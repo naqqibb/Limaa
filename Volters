@@ -1,0 +1,8 @@
+/missile_system
+  /python
+    missile_targeting.py
+  /rust
+    # Rust modules for performance-critical parts (e.g., signal processing)
+  /cpp
+    # C++ modules for hardware interfacing or legacy code
+  README.md

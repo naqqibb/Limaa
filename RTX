@@ -1,4 +1,4 @@
-import requests
+.import requests
 from google.oauth2 import service_account
 from msal import ConfidentialClientApplication
 import numpy as np

@@ -1,0 +1,76 @@
+# Create an STS client
+sts_client = boto3.client('sts')
+
+# Assume a role
+assumed_role = sts_client.assume_role(
+    RoleArn="arn:aws:iam::account-id:role/role-name",
+    RoleSessionName="SessionName"
+)
+
+# Extract credentials
+credentials = assumed_role['Credentials']
+access_key = credentials['AccessKeyId']
+secret_key = credentials['SecretAccessKey']
+session_token = credentials['SessionToken']
+
+# Use credentials for subsequent API calls
+
+# Create an STS client
+sts_client = boto3.client('sts')
+
+# Assume a role for secure access
+assumed_role = sts_client.assume_role(
+    RoleArn="arn:aws:iam::account-id:role/role-name",
+    RoleSessionName="SessionName"
+)
+
+# Extract temporary credentials
+credentials = assumed_role['Credentials']
+access_key = credentials['AccessKeyId']
+secret_key = credentials['SecretAccessKey']
+session_token = credentials['SessionToken']
+
+# Use temporary credentials for subsequent API calls
+print("Temporary Access Key:", access_key)
+
+sts_client = boto3.client('sts')
+
+assumed_role = sts_client.assume_role(
+    RoleArn="arn:aws:iam::account-id:role/role-name",
+    RoleSessionName="SessionName"
+)
+
+credentials = assumed_role['Credentials']
+
+access_key = credentials['AccessKeyId']
+secret_key = credentials['SecretAccessKey']
+session_token = credentials['SessionToken']
+
+# Use these credentials to authenticate API requests securely
+
+#include <iostream>
+#include <cmath>
+
+// Example function for calculating position using GPS data
+void calculatePosition(double latitude, double longitude) {
+    std::cout << "Current Position: " << latitude << ", " << longitude << std::endl;
+}
+
+int main() {
+    double lat = 37.7749; // Example latitude
+    double lon = -122.4194; // Example longitude
+    calculatePosition(lat, lon);
+    return 0;
+}
+
+# Create STS client
+sts_client = boto3.client('sts')
+
+# Assume a role for secure API access
+assumed_role = sts_client.assume_role(
+    RoleArn="arn:aws:iam::account-id:role/role-name",
+    RoleSessionName="SessionName"
+)
+
+credentials = assumed_role['Credentials']
+print("Access Key:", credentials['AccessKeyId'])

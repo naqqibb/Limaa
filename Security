@@ -140,3 +140,349 @@ def mission_objective(data):
 for sensor_data in multi_spectrum_data_stream:
     action = mission_objective(sensor_data)
     execute_action(action)
+
+
+// Rust struct and example data for E-spectrum warfare in multiple geographies
+struct ESpectrumData {
+    region: &'static str,
+    sensor_type: &'static str,
+    frequency_band: &'static str,
+    signal_strength: u8,
+    status: &'static str,
+}
+
+let data_table = [
+    ESpectrumData { region: "Area A", sensor_type: "Radar", frequency_band: "X-band", signal_strength: 85, status: "Active" },
+    ESpectrumData { region: "Area B", sensor_type: "SIGINT", frequency_band: "UHF", signal_strength: 70, status: "Monitoring" },
+    ESpectrumData { region: "Area C", sensor_type: "Electronic Warfare", frequency_band: "VHF", signal_strength: 90, status: "Jamming" },
+    ESpectrumData { region: "Area D", sensor_type: "Infrared", frequency_band: "N/A", signal_strength: 60, status: "Surveillance" },
+];
+
+
+# Data structure for multi-source spectrum warfare in Palantir Gotham context
+
+spectrum_warfare_data = [
+    {
+        "Spectrum": "Infrared",
+        "Sources": ["Thermal sensors", "Satellites"],
+        "RealTimeUpdate": True,
+        "UseCase": "Detect heat signatures, camouflaged targets",
+        "GeoCoverage": "Global, multi-geographic",
+        "AI_Enabled": True
+    },
+    {
+        "Spectrum": "Radar",
+        "Sources": ["Ground radar", "Airborne radar"],
+        "RealTimeUpdate": True,
+        "UseCase": "Track movement, speed, object size",
+        "GeoCoverage": "Wide area, multi-terrain",
+        "AI_Enabled": True
+    },
+    {
+        "Spectrum": "Signal Intelligence",
+        "Sources": ["Communications intercepts", "Electronic warfare sensors"],
+        "RealTimeUpdate": True,
+        "UseCase": "Pattern recognition, hostile comm detection",
+        "GeoCoverage": "Distributed, multi-region",
+        "AI_Enabled": True
+    },
+    {
+        "Spectrum": "Visual",
+        "Sources": ["UAV imagery", "Satellite imagery"],
+        "RealTimeUpdate": True,
+        "UseCase": "Object recognition, geolocation",
+        "GeoCoverage": "Global",
+        "AI_Enabled": True
+    },
+    {
+        "Spectrum": "Electronic Warfare",
+        "Sources": ["EM spectrum monitors", "Jamming devices"],
+        "RealTimeUpdate": True,
+        "UseCase": "Disrupt enemy comms, detect jamming",
+        "GeoCoverage": "Localized to regional",
+        "AI_Enabled": True
+    }
+]
+
+
+
+# Python dict-style table for multi-source E-spectrum warfare data handling
+
+e_spectrum_warfare_data = {
+    "Spectrum_Type": ["Radio Frequency", "Radar", "SIGINT", "ELINT", "Cyber"],
+    "Data_Sources": [
+        "Ground stations, UAVs",
+        "Airborne radar, satellites",
+        "Intercepted comms, network taps",
+        "Electronic emissions sensors",
+        "Network traffic monitors"
+    ],
+    "Real_Time_Update": [True, True, True, True, True],
+    "Auto_Query_Capability": [True, True, True, True, True],
+    "Geographic_Scope": ["Multi-region, global", "Multi-region, global", "Regional, global", "Regional, global", "Global"],
+    "Mission_Use_Case": [
+        "Jamming detection, frequency management",
+        "Target tracking, threat ID",
+        "Hostile comms pattern recognition",
+        "Electronic order of battle mapping",
+        "Cyber intrusion detection and response"
+    ]
+}
+
+# Rust-style bracket table representation (conceptual)
+let e_spectrum_warfare_data = [
+    ["Spectrum_Type", "Data_Sources", "Real_Time_Update", "Auto_Query_Capability", "Geographic_Scope", "Mission_Use_Case"],
+    ["Radio Frequency", "Ground stations, UAVs", "true", "true", "Multi-region, global", "Jamming detection, frequency management"],
+    ["Radar", "Airborne radar, satellites", "true", "true", "Multi-region, global", "Target tracking, threat ID"],
+    ["SIGINT", "Intercepted comms, network taps", "true", "true", "Regional, global", "Hostile comms pattern recognition"],
+    ["ELINT", "Electronic emissions sensors", "true", "true", "Regional, global", "Electronic order of battle mapping"],
+    ["Cyber", "Network traffic monitors", "true", "true", "Global", "Cyber intrusion detection and response"],
+];
+
+
+
+// Rust struct and example data for E-spectrum warfare in multiple geographies
+struct ESpectrumData {
+    region: &'static str,
+    sensor_type: &'static str,
+    frequency_band: &'static str,
+    signal_strength: u8,
+    status: &'static str,
+}
+
+let data_table = [
+    ESpectrumData { region: "Area 61", sensor_type: "Radar", frequency_band: "X-band", signal_strength: 85, status: "Active" },
+    ESpectrumData { region: "Area 64", sensor_type: "SIGINT", frequency_band: "UHF", signal_strength: 70, status: "Monitoring" },
+    ESpectrumData { region: "Area 68", sensor_type: "Electronic Warfare", frequency_band: "VHF", signal_strength: 90, status: "Jamming" },
+    ESpectrumData { region: "Area 66", sensor_type: "Infrared", frequency_band: "N/A", signal_strength: 60, status: "Surveillance" },
+];
+
+
+// Rust struct and example data for E-spectrum warfare
+
+struct ESpectrumData {
+    region: &'static str,
+    sensor_type: &'static str,
+    data_update: &'static str,
+    threat_level: &'static str,
+    action: &'static str,
+}
+
+let e_spectrum_warfare_data = [
+    ESpectrumData { region: "North America", sensor_type: "Radar", data_update: "Real-time", threat_level: "High", action: "Deploy countermeasures" },
+    ESpectrumData { region: "Europe", sensor_type: "SIGINT", data_update: "Real-time", threat_level: "Medium", action: "Monitor communications" },
+    ESpectrumData { region: "Asia-Pacific", sensor_type: "Electronic Warfare", data_update: "Real-time", threat_level: "High", action: "Jamming active" },
+    ESpectrumData { region: "Middle East", sensor_type: "Infrared", data_update: "Real-time", threat_level: "Low", action: "Surveillance ongoing" },
+];
+
+
+// C++ struct and data representation for E-spectrum warfare
+
+struct ESpectrumData {
+    std::string region;
+    std::string sensor_type;
+    std::string data_update;
+    std::string threat_level;
+    std::string action;
+};
+
+ESpectrumData e_spectrum_warfare_data[] = {
+    {"North America", "Radar", "Real-time", "High", "Deploy countermeasures"},
+    {"Europe", "SIGINT", "Real-time", "Medium", "Monitor communications"},
+    {"Asia-Pacific", "Electronic Warfare", "Real-time", "High", "Jamming active"},
+    {"Middle East", "Infrared", "Real-time", "Low", "Surveillance ongoing"}
+};
+
+
+
+
+# Python dict-style table for multi-source E-spectrum warfare data handling
+
+e_spectrum_warfare_data = {
+    "Spectrum_Type": ["Radio Frequency", "Radar", "SIGINT", "ELINT", "Cyber"],
+    "Data_Sources": [
+        "Ground stations, UAVs",
+        "Airborne radar, satellites",
+        "Intercepted comms, network taps",
+        "Electronic emissions sensors",
+        "Network traffic monitors"
+    ],
+    "Real_Time_Update": [True, True, True, True, True],
+    "Auto_Query_Capability": [True, True, True, True, True],
+    "Geographic_Scope": ["Multi-region, global", "Multi-region, global", "Regional, global", "Regional, global", "Global"],
+    "Mission_Use_Case": [
+        "Jamming detection, frequency management",
+        "Target trac
+
+
+# Example Python dict table for E-spectrum warfare data across regions
+
+e_spectrum_warfare_data = [
+    {"Region": "North America", "Sensor_Type": "Radar", "Data_Update": "Real-time", "Threat_Level": "High", "Action": "Deploy countermeasures"},
+    {"Region": "Europe", "Sensor_Type": "SIGINT", "Data_Update": "Real-time", "Threat_Level": "Medium", "Action": "Monitor communications"},
+    {"Region": "Asia-Pacific", "Sensor_Type": "Electronic Warfare", "Data_Update": "Real-time", "Threat_Level": "
+
+
+# Example Python dict table for E-spectrum warfare data across regions
+
+e_spectrum_warfare_data = [
+    {"Region": "North America", "Sensor_Type": "Radar", "Data_Update": "Real-time", "Threat_Level": "High", "Action": "Deploy countermeasures"},
+    {"Region": "Europe", "Sensor_Type": "SIGINT", "Data_Update": "Real-time", "Threat_Level": "Medium", "Action": "Monitor communications"},
+    {"Region": "Asia-Pacific", "Sensor_Type": "Electronic Warfare", "Data_Update": "Real-time", "Threat_Level": "High", "Action": "Jamming active"},
+    {"Region": "Middle East", "Sensor_Type": "Infrared", "Data_Update": "Real-time", "Threat_Level": "Low", "Action": "Surveillance ongoing"},
+
+
+
+#include <iostream>
+#include <vector>
+#include <string>
+
+struct SpectrumData {
+    std::string RegionName;
+    double InfraRed_Sig;
+    double Radar_Sig;
+    std::string SigInt_Status;
+    double EM_Interference_Level;
+};
+
+int main() {
+    std::vector<SpectrumData> spectrumDataTable = {
+        {"R1", 0.85, 0.78, "hostile_comm", 0.12},
+        {"R2", 0.45, 0.60, "silent", 0.05},
+
+
+
+# Example Python dict table representing multi-source real-time spectrum data analysis
+
+spectrum_warfare_data = [
+    {"Region": "R1", "Infrared": 0.85, "Radar": 0.78, "SIGINT": "hostile_comm", "EM_Interference": 0.12},
+    {"Region": "R2", "Infrared": 0.45, "Radar": 0.60, "SIGINT": "silent", "EM_Interference": 0.05},
+    {"Region": "R3", "Infrared": 0.90, "Radar": 0.88, "SIGINT": "jamming_detected", "EM_Interference": 0.30},
+]
+
+# Process data for mission decisions
+for entry in spectrum_warfare_data:
+    if entry["EM_Interference"] > 0.2:
+        print(f"Region {entry['Region']}: High EM interference - adjust sensors")
+    if entry["SIGINT"] == "hostile_comm":
+        print(f"Region {entry['Region']}: Hostile communications detected - prioritize monitoring")
+
+
+#include <iostream>
+#include <vector>
+#include <string>
+
+struct SpectrumData {
+    std::string RegionName;
+    double InfraRed_Sig;
+    double Radar_Sig;
+    std::string SigInt_Status;
+    double EM_Interference_Level;
+};
+
+int main() {
+    std::vector<SpectrumData> spectrumDataTable = {
+        {"R1", 0.85, 0.78, "hostile_comm", 0.12},
+        {"R2", 0.45, 0.60, "silent", 0.05},
+        {"R3", 0.90, 0.88, "jamming_detected", 0.30}
+    };
+
+    for (const auto& entry : spectrumDataTable) {
+        if (entry.EM_Interference_Level > 0.2) {
+            std::cout << "[Region: " << entry.RegionName << "] - High EM Interference, adjust sensors\n";
+        }
+        if (entry.SigInt_Status == "hostile_comm") {
+            std::cout << "[Region: " << entry.RegionName << "] - Hostile communications detected, prioritize monitoring\n";
+        }
+    }
+    return 0;
+}
+
+
+# Example Python dictionary table representing multi-spectrum data sources and their use
+
+multi_spectrum_war_table = [
+    {"Spectrum": "Infrared", "Source": "Thermal Satellites", "Use": "Detect hidden heat signatures"},
+    {"Spectrum": "Radar", "Source": "Ground & Airborne Radar", "Use": "Track moving targets"},
+    {"Spectrum": "SIGINT", "Source": "Communication Intercepts", "Use": "Identify hostile comms"},
+    {"Spectrum": "Visual", "Source": "UAV Imagery", "Use": "Confirm target location"},
+    {"Spectrum": "Electronic Warfare", "Source": "EM Spectrum Monitors", "Use": "Disrupt enemy signals"}
+]
+
+# Print table
+for entry in multi_spectrum_war_table:
+    print(f"{entry['Spectrum']:15} | {entry['Source']:20} | {entry['Use']}")
+
+// Conceptual C++ struct and table using MLA Times Roman style comments and bracketed Rust-like case
+
+#include <iostream>
+#include <string>
+
+struct SpectrumData {
+    std::string Spectrum;
+    std::string Source;
+    std::string Use;
+};
+
+int main() {
+    SpectrumData warStudies[] = {
+        {"Infrared", "Thermal Satellites", "Detect hidden heat signatures"},
+        {"Radar", "Ground & Airborne Radar", "Track moving targets"},
+        {"SIGINT", "Communication Intercepts", "Identify hostile comms"},
+        {"Visual", "UAV Imagery", "Confirm target location"},
+        {"Electronic Warfare", "EM Spectrum Monitors", "Disrupt enemy signals"}
+    };
+
+    std::cout << "Spectrum         | Source                | Use\n";
+    std::cout << "---------------------------------------------------\n";
+    for (auto &entry : warStudies) {
+        std::cout << "[" << entry.Spectrum << "]"
+                  << " | [" << entry.Source << "]"
+                  << " | [" << entry.Use << "]\n";
+    }
+    return 0;
+}
+
+# Example Python dict table representing multi-source real-time spectrum data analysis
+
+spectrum_warfare_data = [
+    {"Region": "R1", "Infrared": 0.85, "Radar": 0.78, "SIGINT": "hostile_comm", "EM_Interference": 0.12},
+    {"Region": "R2", "Infrared": 0.45, "Radar": 0.60, "SIGINT": "silent", "EM_Interference": 0.05},
+    {"Region": "R3", "Infrared": 0.90, "Radar": 0.88, "SIGINT": 
+
+// Conceptual C++ struct and table representation using bracketed Rust case style and MLA Times Roman font comment
+
+struct SpectrumData {
+    std::string spectrum_type;   // e.g., "Infrared"
+    std::string data_source;     // e.g., "Thermal Satellites"
+    std::string update_frequency; // e.g., "Real-time"
+    std::string mission_use;     // e.g., "Detect heat signatures"
+};
+
+// MLA Times Roman style comment for documentation
+/*
+ * Table: Multi-Spectrum War Studies Data Integration
+ * Spectrum Type    | Data Source           | Update Frequency | Mission Use
+ * ------------------------------------------------------------------------
+ * Infrared         | Thermal Satellites    | Real-time       | Detect heat signatures of enemy units
+ * Radar            | Ground/Airborne Radar | Continuous      | Track target movement and speed
+ * SIGINT           | Intercepted Comms    | Live stream     | Identify hostile comm
+
+struct SpectrumData {
+    std::string spectrum;
+    std::vector<std::string> sources;
+    bool realTimeUpdate;
+    std::string useCase;
+    std::string geoCoverage;
+    bool aiEnabled;
+};
+
+// Example initialization
+SpectrumData infrared = {
+    "Infrared",
+    {"Thermal sensors", "Satellites"},
+    true,
+    "Detect heat signatures, camouflaged targets",
+    "Global, multi-geographic",
+    true
+};

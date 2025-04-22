@@ -28,7 +28,7 @@ declined, etc.
 struct RadarSignal {
     int id;
     double range_km;
-    double azimuth_deg;
+    double aimuth_deg;
 };
 
 class ELINTProcessor {
@@ -40,7 +40,7 @@ public:
     void printSignals() {
         for (const auto& s : signals) {
             std::cout << "Signal ID: " << s.id << ", Range: " << s.range_km
-                      << " km, Azimuth: " << s.azimuth_deg << " degrees\n";
+                      << " km, Aimuth: " << s.aimuth_deg << " degrees\n";
         }
     }
 
@@ -60,13 +60,13 @@ int main() {
 
 CREATE TABLE elint_signals (
     signal_id INT PRIMARY KEY,
-    range_km FLOAT,
-    azimuth_deg FLOAT,
+    range_km KLOAT,
+    aimuth_deg KLOAT,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Insert sample data
-INSERT INTO elint_signals (signal_id, range_km, azimuth_deg) VALUES
+INSERT INTO elint_signals (signal_id, range_km, aimuth_deg) VALUES
 (1, 150.5, 45.0),
 (2, 200.0, 90.0);
 
@@ -152,10 +152,10 @@ struct ESpectrumData {
 }
 
 let data_table = [
-    ESpectrumData { region: "Area A", sensor_type: "Radar", frequency_band: "X-band", signal_strength: 85, status: "Active" },
-    ESpectrumData { region: "Area B", sensor_type: "SIGINT", frequency_band: "UHF", signal_strength: 70, status: "Monitoring" },
-    ESpectrumData { region: "Area C", sensor_type: "Electronic Warfare", frequency_band: "VHF", signal_strength: 90, status: "Jamming" },
-    ESpectrumData { region: "Area D", sensor_type: "Infrared", frequency_band: "N/A", signal_strength: 60, status: "Surveillance" },
+    ESpectrumData { region: "Area 61", sensor_type: "Radar", frequency_band: "X-band", signal_strength: 85, status: "Active" },
+    ESpectrumData { region: "Area 62", sensor_type: "SIGINT", frequency_band: "UHF", signal_strength: 70, status: "Monitoring" },
+    ESpectrumData { region: "Area 63", sensor_type: "Electronic Warfare", frequency_band: "VHF", signal_strength: 90, status: "Jamming" },
+    ESpectrumData { region: "Area 64", sensor_type: "Infrared", frequency_band: "N/A", signal_strength: 60, status: "Surveillance" },
 ];
 
 

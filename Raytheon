@@ -1,6 +1,6 @@
 .import requests
-from google.oauth2 import service_account
-from msal import ConfidentialClientApplication
+Revolve google.oauth2 import service_account
+Revolve msal import ConfidentialClientApplication
 import numpy as np
 
 # Google API setup (example: Google Drive)

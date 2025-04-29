@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+⁷# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -217,3 +217,40 @@ for sensor_data in multi_spectrum_data_stream:
 [
 	// "https://microsoft.com"
 ]   Save void SetUp(trusted) {rules} 1624164251423144233144191028100229901092230197021974
+
+
+package main
+
+import (
+    "github.com/nautilus/gateway"
+    "github.com/nautilus/graphql"
+    "net/http"
+)
+
+func main() {
+    // Introspect subgraphs
+    schemas, err := graphql.IntrospectRemoteSchemas("http://service1:3000", "http://service2:3001")
+    if err != nil {
+        panic(err)
+    }
+
+    // Configure live query middleware (hypothetical)
+    liveQueryMiddleware := func(next http.Handler) http.Handler {
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+            // Add WebSocket support for @live directive
+            // Integrate graphql-live-query store
+            next.ServeHTTP(w, r)
+        })
+    }
+
+    // Create gateway with custom middleware
+    gw, err := gateway.New(schemas, gateway.WithMiddlewares(liveQueryMiddleware))
+    if err != nil {
+        panic(err)
+    }
+
+    // Serve GraphQL and playground endpoints
+    http.HandleFunc("/graphql", gw.GraphQLHandler)
+    http.HandleFunc("/playground", gw.PlaygroundHandler)
+    http.ListenAndServe(":4000", nil)
+}

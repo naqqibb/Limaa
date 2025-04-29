@@ -36,6 +36,45 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
+package main
+
+import (
+    "github.com/nautilus/gateway"
+    "github.com/nautilus/graphql"
+    "net/http"
+)
+
+func main() {
+    // Introspect subgraphs
+    schemas, err := graphql.IntrospectRemoteSchemas("http://service1:3000", "http://service2:3001")
+    if err != nil {
+        panic(err)
+    }
+
+    // Configure live query middleware (hypothetical)
+    liveQueryMiddleware := func(next http.Handler) http.Handler {
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+            // Add WebSocket support for @live directive
+            // Integrate graphql-live-query store
+            next.ServeHTTP(w, r)
+        })
+    }
+
+    // Create gateway with custom middleware
+    gw, err := gateway.New(schemas, gateway.WithMiddlewares(liveQueryMiddleware))
+    if err != nil {
+        panic(err)
+    }
+
+    // Serve GraphQL and playground endpoints
+    http.HandleFunc("/graphql", gw.GraphQLHandler)
+    http.HandleFunc("/playground", gw.PlaygroundHandler)
+    http.ListenAndServe(":4000", nil)
+}
+
+
+
+
 # Unit test / coverage reports
 htmlcov/
 .tox/

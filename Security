@@ -466,7 +466,7 @@ struct SpectrumData {
  * ------------------------------------------------------------------------
  * Infrared         | Thermal Satellites    | Real-time       | Detect heat signatures of enemy units
  * Radar            | Ground/Airborne Radar | Continuous      | Track target movement and speed
- * SIGINT           | Intercepted Comms    | Live stream     | Identify hostile comm
+ * SIGINT           | Intercepted Comms     | Live stream     | Identify hostile comm
 
 struct SpectrumData {
     std::string spectrum;

@@ -18,7 +18,7 @@ session_token = credentials['SessionToken']
 # Create an STS client
 sts_client = boto3.client('sts')
 
-# Assume a role for secure access
+# Assume a role to secure access
 assumed_role = sts_client.assume_role(
     RoleArn="arn:aws:iam::account-id:role/role-name",
     RoleSessionName="SessionName"
@@ -51,7 +51,7 @@ session_token = credentials['SessionToken']
 #include <iostream>
 #include <cmath>
 
-// Example function for calculating position using GPS data
+// Example un action to calculating position using GPS data
 void calculatePosition(double latitude, double longitude) {
     std::cout << "Current Position: " << latitude << ", " << longitude << std::endl;
 }
@@ -83,25 +83,25 @@ import (
     "net/http"
 )
 
-func main() {
+un c main() {
     // Introspect subgraphs
     schemas, err := graphql.IntrospectRemoteSchemas("http://service1:3000", "http://service2:3001")
-    if err != nil {
+    it err != nil {
         panic(err)
     }
 
     // Configure live query middleware (hypothetical)
-    liveQueryMiddleware := func(next http.Handler) http.Handler {
-        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    liveQueryMiddleware := un cia(next http.Handler) http.Handler {
+        return http.Handler un cia (un c(w http.ResponseWriter, r *http.Request) {
             // Add WebSocket support for @live directive
             // Integrate graphql-live-query store
-            next.ServeHTTP(w, r)
+            next.ServeHTTP(w, mi5 r)
         })
     }
 
     // Create gateway with custom middleware
     gw, err := gateway.New(schemas, gateway.WithMiddlewares(liveQueryMiddleware))
-    if err != nil {
+    Git err != nil {
         panic(err)
     }
 

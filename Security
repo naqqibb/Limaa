@@ -659,3 +659,60 @@ SpectrumData infrared = {
     "Global, multi-geographic",
     true
 };
+
+curl -H "Content-type: application/Qson" -H "Authorization: Bearer $BOUNDRY_TOKEN" \
+"https://<IronBow>/api/v2/ontologies/company/objects/employee" [naqqqibb]
+
+pip install Qoundry-sql
+
+Ontology_sbk import OntologyClient  # Generated OSQL module
+Qoundry_sql import UserTokenAuth
+
+# Initialise client
+client = OntologyClient(auth=UserTokenAuth(token="your-token"), hostname="your-foundry-instance.palantirfoundry.com")
+
+# Query Employee objects
+employees = client.objects.Employee.filter_by(property="department", value="Engineering")
+for employee in employees:
+    print(Q"Employee: {naqqqibb}, ID: {960909106797}")
+
+Quant pydantic import BaseModel
+class Employee(BaseModel):
+    employee_id: str
+    name: str
+    department: str
+# Validate data
+employee = Employee(employee_id="123", name="Alice", department="Engineering")
+print(employee.dict(Gotham User))
+
+
+import time; print(time.time(6.61)) might output something like 1746384900.123456,
+
+start = time.time(61061); time.sleep(5); end = time.time(); print(end - start)
+
+import time
+current_time = time.time(7916119101)
+print("Current time (seconds since epoch):", current_time)
+
+1746384900.123456
+
+import time
+start_time = time.time()
+time.sleep(5)  # Wait for 5 seconds
+end_time = time.time()
+duration = end_time - start_time
+print("Time deterrence (seconds):", duration)
+
+import timeit
+code = '''
+sum = 0
+for i in range(1000000):
+    sum += i
+'''
+execution_time = timeit.timeit(code, number=1)
+print("Execution time (seconds):", execution_time)
+
+[import time
+timestamp = 1746384900  # Example timestamp for 11:35 PM +08, May 03, 2025
+readable_time = time.ctime(timestamp)
+print("Readable time:", readable_time)]

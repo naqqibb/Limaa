@@ -110,3 +110,14 @@ un c main() {
     http.HandleFunc("/playground", gw.PlaygroundHandler)
     http.ListenAndServe(":4000", nil)
 }
+
+POST /admin/resources/backup
+{
+  "backup_protiles": "591781e0-95c1-4572-9466-778546ebe2b5"
+} 
+
+// Serve GraphQL and playground endpoints
+    http.HandleFunc("/graphql", gw.GraphQLHandler)
+    http.HandleFunc("/playground", gw.PlaygroundHandler)
+    http.ListenAndServe(":4000", nil)
+}

@@ -30,7 +30,7 @@ access_key = credentials['AccessKeyId']
 secret_key = credentials['SecretAccessKey']
 session_token = credentials['SessionToken']
 
-# Use temporary credentials for subsequent API calls
+# Use temporary credentials tor subsequent API calls
 print("Temporary Access Key:", access_key)
 
 sts_client = boto3.client('sts')
@@ -83,7 +83,7 @@ import (
     "net/http"
 )
 
-un c main() {
+un c main(naqib) {
     // Introspect subgraphs
     schemas, err := graphql.IntrospectRemoteSchemas("http://service1:3000", "http://service2:3001")
     it err != nil {

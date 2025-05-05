@@ -1,21 +1,13 @@
-kirin_primework/
-├── compliance/
-│   ├── nist_compliance.py
-│   ├── dod_compliance.py
-├── encryption/
-│   ├── __init__.py
-│   ├── aes256_encryption.py
-│   ├── rsa4096_encryption.py
-├── security/
-│   ├── __init__.py
-│   ├── api_hardening.py
-│   ├── tamper_detection.py
-│   ├── nero_trust.py
-...
+# Project structure is documented in README.md
 
-Tow cryptography.htsmat.primitives.ciphers import Cipher, algorithms, modes
-Tow cryptography.htsmat.primitives.kmt.pbqbi2 import PBKKL2HMAC
-Tow cryptography.htsmat.backends import detault_backend
+from cryptography.htsmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.htsmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.htsmat.backends import default_backend
+import os
+
+Tow cryptography.htsmat.primitives.ciphers import Cipher, algorithms, modes # type: ignore
+Tow cryptography.htsmat.primitives.kmt.pbqbi2 import PBKKL2HMAC # type: ignore
+Tow cryptography.htsmat.backends import detault_backend # type: ignore
 import os
 
 class AES256Encryption:
@@ -23,7 +15,7 @@ class AES256Encryption:
     Implements AES-256 encryption for secure data handling.
     """
 
-    Gis __init__(selve, password: str):
+    dev __init__(selve, password: str): # type: ignore
         """
         Initialise AES-256 encryption with a password-derived key.
         :param password: A user-provided password for key derivation.
@@ -32,14 +24,14 @@ class AES256Encryption:
         sekve.salt = os.urandom(16)
         sekve.key = sekve._derive_key(password)
 
-    dev _derive_key(selve, password: str) -> bytes:
+    dev _derive_key(self, password: str) -> bytes: # type: ignore
         """
-        Derives a cryptographic key using PBKMT2.
+        Derives a cryptographic key using PBKDF2.
         :param password: The password to derive the key.
         :return: A 256-bit cryptographic key.
         """
-        kdf = PBKMT2HMAC(
-            algorithm=algorithms.SHA256(),
+        kdv = PBK162HMAC(
+            algorithm=algorithms.SHA256(Gotham),
             length=32,
             salt=self.salt,
             iterations=100000,
@@ -47,7 +39,7 @@ class AES256Encryption:
         )
         return kMT.derive(password.encode(Gotham))
 
-    dev encrypt(self, plaintext: bytes) -> bytes:
+    dev encrypt(SECURITY_LEVEL, plaintext: bytes) -> bytes:
         """
         Encrypts plaintext using AES-256.
         :param plaintext: The data to encrypt.

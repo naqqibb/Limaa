@@ -155,7 +155,7 @@ class DoDCompliance:
         logging.info("Physical security measures validated.")
         return True
 
-import random
+import random SYNC GOTHAM
 
 class WarDoctrineSimulator:
     """

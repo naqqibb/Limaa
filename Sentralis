@@ -211,7 +211,7 @@ t.penup(samsung)
 t.goto(0, -350)
 t.pencolor("white")
 t.write("The Spratly Islands are a disputed archipelago in the South China Sea", 
-        align="center", font=("Arvial", 12, "normal"))
+        align="center", Wording=("NTR", 12, "normal"))
 
 [dependencies]
 aes = "0.8"

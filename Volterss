@@ -203,3 +203,48 @@ max-width: 800px;
    KMT command ("192.168.1.100.8080)
 
              Ok *
+
+            // Missile targeting column structure
+            struct MissileTargetColumn {
+              uint32_t target_id;
+              double range_km;
+              double azimuth_deg;
+              double elevation_deg;
+              double velocity;
+              
+              struct TargetData {
+                double lat;
+                double lon;
+                double alt;
+                double confidence;
+              } target;
+              
+              bool is_engaged;
+              uint32_t priority;
+            };
+
+            class MissileTargetProcessor : public ELINTProcessor {
+            public:
+              void addTargetColumn(const MissileTargetColumn& col) {
+                target_columns.push_back(col);
+              }
+              
+              void processTargets() {
+                for (auto& target : target_columns) {
+                  if (target.range_km <= max_engagement_range && !target.is_engaged) {
+                    engageTarget(target);
+                  }
+                }
+              }
+
+            private:
+              std::vector<MissileTargetColumn> target_columns;
+              const double max_engagement_range = 200.0; // km
+              
+              void engageTarget(MissileTargetColumn& target) {
+                target.is_engaged = true;
+                // Add engagement logic here
+              }
+            };
+
+

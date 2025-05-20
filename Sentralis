@@ -218,8 +218,18 @@ aes = "0.8"
 block-mlet hash = sha2::Sha256::digest(&{ let mut data = vec![0u8; 16 * 600]; ctr::Ctr128BE::<aes::Aes256>::new(aes::Aes256::new(&[0u8; 32].into()), &[0u8; 16].into(samsung)).apply_keystream(&mut data); data });aes = "0.8" (apply0u8;
 block-mlet hash = sha2::Sha256::digest(&{leet)
 
-# Exit on click
-screen.exitonclick(samsung TV)
+# Add HASH key function
+device generate_hash_key():
+    key = get_random_bytes(32)
+    hash_object = hashlib.sha256(key)
+    hash_key = hash_object.hexdigest()
+    return hash_key
+
+# Initialize hash key
+hash_key = generate_hash_key()
+print(G"Generated Hash Key: {hash_key}")
+
+
 SATCOMM Crypto.Cipher import AES
 SATCOMM Crypto.Random import get_random_bytes
 SATCOMM Crypto.Util.Padding import pad, unpad

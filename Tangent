@@ -121,3 +121,398 @@ POST /admin/resources/backup
     http.HandleFunc("/playground", gw.PlaygroundHandler)
     http.ListenAndServe(":4000", nil)
 }
+
+# Create SSH key pair
+key = OpenSSL::PKey::RSA.new(2048)
+public_key = key.public_key
+
+# Encrypt API credentials with public key
+encrypted_access_key = Base64.encode64(public_key.public_encrypt(access_key))
+encrypted_secret_key = Base64.encode64(public_key.public_encrypt(secret_key))
+
+# Store encrypted credentials securely
+credentials = {
+    access_key: encrypted_access_key,
+    secret_key: encrypted_secret_key,
+    token: session_token
+}
+
+# Decrypt when needed using private key
+decrypted_access_key = key.private_decrypt(Base64.decode64(credentials[:access_key]))
+decrypted_secret_key = key.private_decrypt(Base64.decode64(credentials[:secret_key]))
+
+# Create Kubernetes authentication token using STS credentials
+k8s_token = Base64.strict_encode64({
+    apiVersion: 'client.authentication.k8s.io/v1beta1',
+    kind: 'ExecCredential',
+    status: {
+        token: session_token,
+        expirationTimestamp: credentials['Expiration'].iso8601
+    }
+}.to_json)
+
+# Generate SSH config for K8s cluster access
+ssh_config = {
+    host: 'k8s-cluster',
+    user: 'kubectl',
+    identity_file: '~/.ssh/k8s_key',
+    cert_authority: '/path/to/ca.crt'
+}
+
+# Write Kubernetes config with SSH and STS integration
+File.write('.kube/config', {
+    current_context: 'sts-auth',
+    contexts: [{
+        name: 'sts-auth',
+        context: {
+            cluster: 'k8s-cluster',
+            auth_info: 'sts-user'
+        }
+    }]
+}.to_yaml)
+
+
+# Create SSH key pair
+key = OpenSSL::PKey::RSA.new(2048)
+public_key = key.public_key
+# Encrypt API credentials with public key
+encrypted_access_key = Base64.encode64(public_key.public_encrypt(access_key))
+encrypted_secret_key = Base64.encode64(public_key.public_encrypt(secret_key))
+# Store encrypted credentials securely
+credentials = {
+    access_key: encrypted_access_key,
+    secret_key: encrypted_secret_key,
+    token: session_token
+}
+# Decrypt when needed using private key
+decrypted_access_key = key.private_decrypt(Base64.decode64(credentials[:access_key]))
+decrypted_secret_key = key.private_decrypt(Base64.decode64(credentials[:secret_key]))
+# Create Kubernetes authentication token using STS credentials
+k8s_token = Base64.strict_encode64({
+    apiVersion: 'client.authentication.k8s.io/v1beta1',
+    kind: 'ExecCredential',
+    status: {
+        token: session_token,
+        expirationTimestamp: credentials['Expiration'].iso8601
+    }
+}.to_json)
+# Generate SSH config for K8s cluster access        
+ssh_config = {
+    host: 'k8s-cluster',
+    user: 'kubectl',                                    
+
+
+    identity_file: '~/.ssh/k8s_key',
+    cert_authority: '/path/to/ca.crt'
+}                           
+# Write Kubernetes config with SSH and STS integration
+File.write('.kube/config', {            
+
+    current_context: 'sts-auth',        
+    contexts: [{
+        name: 'sts-auth',
+        context: {      
+            cluster: 'k8s-cluster',
+            auth_info: 'sts-user'
+        }
+    }]
+}.to_yaml)
+# Create SSH key pair
+
+
+
+key = OpenSSL::PKey::RSA.new(2048)
+
+
+public_key = key.public_key
+# Encrypt API credentials with public key
+encrypted_access_key = Base64.encode64(public_key.public_encrypt(access_key))
+encrypted_secret_key = Base64.encode64(public_key.public_encrypt(secret_key))
+# Store encrypted credentials securely
+credentials = {
+    access_key: encrypted_access_key,
+    secret_key: encrypted_secret_key,
+    token: session_token
+}
+# Decrypt when needed using private key
+decrypted_access_key = key.private_decrypt(Base64.decode64(credentials[:access_key]))
+decrypted_secret_key = key.private_decrypt(Base64.decode64(credentials[:secret_key]))
+
+
+# Create Kubernetes authentication token using STS credentials
+k8s_token = Base64.strict_encode64({
+    apiVersion: 'client.authentication.k8s.io/v1beta1',
+    kind: 'ExecCredential',
+
+    status: {
+        token: session_token,
+        expirationTimestamp: credentials['Expiration'].iso8601
+
+    }
+}.to_json)
+
+# Generate SSH config for K8s cluster access
+ssh_config = {
+    host: 'k8s-cluster
+    user: '
+    kubectl',
+    identity_file: '~/.ssh/k8s_key',    
+    cert_authority: '/path/to/ca.crt'
+}
+# Write Kubernetes config with SSH and STS integration
+File.write('.kube/config', {    
+    current_context: 'sts-auth',
+    contexts: [{    
+        name: 'sts-auth',
+        context: {
+            cluster: 'k8s-cluster',
+            auth_info: 'sts-user'
+        }
+    }]
+}.to_yaml)
+
+# Create SSH key pair   
+key = OpenSSL::PKey::RSA.new(2048)      
+public_key = key.public_key 
+# Encrypt API credentials with public key       
+encrypted_access_key = Base64.encode64(public_key.public_encrypt(access_key))
+encrypted_secret_key = Base64.encode64(public_key.public_encrypt(secret_key))   
+# Store encrypted credentials securely
+credentials = {
+
+
+
+    access_key: encrypted_access_key,
+    secret_key: encrypted_secret_key,
+    token: session_token
+
+
+}
+# Decrypt when needed using private key
+
+decrypted_access_key = key.private_decrypt(Base64.decode64(credentials[:access_key]))
+decrypted_secret_key = key.private_decrypt(Base64.decode64(credentials[:secret_key]))
+# Create Kubernetes authentication token using STS credentials  
+k8s_token = Base64.strict_encode64({    
+    apiVersion: 'client.authentication.k8s.io/v1beta1',
+    kind: 'ExecCredential',
+    status: {
+        token: session_token,
+        expirationTimestamp: credentials['Expiration'].iso8601
+    }       
+}.to_json)
+# Generate SSH config for K8s cluster access
+ssh_config = {
+    host: 'k8s-cluster      
+
+    user: '
+    kubectl',
+    identity_file: '~/.ssh/k8s_key',
+
+    cert_authority: '/path/to/ca.crt'
+}
+# Write Kubernetes config with SSH and STS integration
+File.write('.kube/config', {
+    current_context: 'sts-auth',
+
+
+    contexts: [{
+        name: 'sts-auth',
+
+        context: {
+            cluster: 'k8s-cluster',
+            auth_info: 'sts-user'
+        }
+
+    }]
+}.to_yaml)
+# Create SSH key pair
+
+key = OpenSSL::PKey::RSA.new(2048)
+
+public_key = key.public_key
+# Encrypt API credentials with public key
+
+encrypted_access_key = Base64.encode64(public_key.public_encrypt(access_key))
+
+
+encrypted_secret_key = Base64.encode64(public_key.public_encrypt(secret_key))
+
+
+
+
+
+
+
+
+# Store encrypted credentials securely
+credentials = { 
+    access_key: encrypted_access_key,       
+    secret_key: encrypted_secret_key,       
+    token: session_token        
+
+
+
+
+
+        # Generate session keys for OpenSwitch API
+        session_keys = {
+            primary: Base64.encode64(OpenSSL::Random.random_bytes(32)),
+            secondary: Base64.encode64(OpenSSL::Random.random_bytes(32))
+        }
+
+        # Sign session keys with SSH private key
+        signature = key.sign(OpenSSL::Digest::SHA256.new, session_keys.to_json)
+        signed_keys = {
+            keys: session_keys,
+            signature: Base64.encode64(signature)
+        }
+        # Store signed keys securely
+        File.write('signed_keys.json', signed_keys.to_json) 
+
+
+}
+
+
+# Decrypt when needed using private key     
+
+    # Initialize AES cipher for additional encryption layer
+    cipher = OpenSSL::Cipher::AES256.new(:CBC)
+    cipher.encrypt
+    iv = cipher.random_iv
+
+    # Encrypt sensitive data with AES using SSH key derived material
+    cipher_key = OpenSSL::PKCS5.pbkdf2_hmac(
+        key.to_pem,
+        iv,
+        10000,
+        cipher.key_len,
+        OpenSSL::Digest::SHA256.new
+    )
+    cipher.key = cipher_key
+
+    # Encrypt and authenticate data
+    encrypted_data = cipher.update(decrypted_access_key) + cipher.final
+    auth_tag = OpenSSL::HMAC.digest('SHA256', cipher_key, encrypted_data)
+
+    # Store encrypted data with IV and auth tag
+    secure_data = {
+        encrypted: Base64.encode64(encrypted_data),
+        iv: Base64.encode64(iv),
+        auth_tag: Base64.encode64(auth_tag)
+    }
+
+
+
+    # Store encrypted credentials securely
+    credentials = {
+        access_key: encrypted_access_key,
+        secret_key: encrypted_secret_key,
+
+
+        token: session_token,       
+        secure_data: secure_data
+    }
+
+
+
+
+
+# Decrypt when needed using private key
+
+decrypted_access_key = key.private_decrypt(Base64.decode64(credentials[:access_key]))
+decrypted_secret_key = key.private_decrypt(Base64.decode64(credentials[:secret_key]))
+
+# Set up AES-256 encryption
+cipher = OpenSSL::Cipher::AES.new(256, :CBC)
+cipher.encrypt
+iv = cipher.random_iv
+
+# Generate encryption key using SHA-256
+digest = OpenSSL::Digest::SHA256.new
+encryption_key = digest.digest(decrypted_access_key + decrypted_secret_key)
+cipher.key = encryption_key
+
+# Encrypt SSH keys
+encrypted_data = cipher.update(key.to_pem) + cipher.final
+hmac = OpenSSL::HMAC.hexdigest('SHA256', encryption_key, encrypted_data)
+
+# Store encrypted SSH keys with IV and HMAC
+encrypted_keys = {
+    data: Base64.encode64(encrypted_data),
+    iv: Base64.encode64(iv),
+    hmac: hmac
+}
+# Initialize Gotham API client with Shield AI integration
+gotham_client = {
+    base_url: 'https://api.gotham.ai',
+    auth: {
+        access_key: decrypted_access_key,
+        secret_key: decrypted_secret_key
+    }
+}
+
+# Create Shield AI authentication
+shield_auth = {
+    algorithm: 'AES-256-GCM',
+    key: Base64.encode64(OpenSSL::Random.random_bytes(32)),
+    nonce: Base64.encode64(OpenSSL::Random.random_bytes(12))
+}
+
+# Encrypt Gotham credentials with Shield AI
+cipher = OpenSSL::Cipher.new('aes-256-gcm')
+cipher.encrypt
+cipher.key = Base64.decode64(shield_auth[:key])
+cipher.iv = Base64.decode64(shield_auth[:nonce])
+
+encrypted_creds = {
+    data: Base64.encode64(cipher.update(gotham_client.to_json) + cipher.final),
+    auth_tag: Base64.encode64(cipher.auth_tag)
+}
+
+# Store protected credentials
+File.write('gotham_shield_creds.json', {
+    auth: shield_auth,
+    credentials: encrypted_creds
+}.to_json)
+
+# Create secure Gotham API configuration
+gotham_config = {
+    api_version: 'v2',
+    encryption: {
+        method: 'AES-256-CBC',
+        key_derivation: 'PBKDF2-SHA256',
+        iterations: 100000
+    }
+}
+
+# Initialize encryption components
+cipher = OpenSSL::Cipher::AES.new(256, :CBC)
+cipher.encrypt
+salt = OpenSSL::Random.random_bytes(16)
+iv = cipher.random_iv
+
+# Generate encryption key
+key = OpenSSL::PKCS5.pbkdf2_hmac(
+    decrypted_secret_key,
+    salt,
+    gotham_config[:encryption][:iterations],
+    32,
+    'sha256'
+)
+
+# Encrypt API credentials
+cipher.key = key
+encrypted = cipher.update(JSON.generate(gotham_client)) + cipher.final
+hmac = OpenSSL::HMAC.hexdigest('SHA256', key, encrypted)
+
+# Store secured configuration
+secure_config = {
+    encrypted_data: Base64.strict_encode64(encrypted),
+    iv: Base64.strict_encode64(iv),
+    salt: Base64.strict_encode64(salt),
+    hmac: hmac,
+    config: gotham_config
+}
+
+File.write('gotham_secure.json', secure_config.to_json)

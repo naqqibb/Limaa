@@ -248,3 +248,566 @@ max-width: 800px;
             };
 
 
+#!/usr/bin/env python3
+"""
+╔══════════════════════════════════════════════════════════════════╗
+║  RHIZOME // NEXUS IOC BRIDGE                                    ║
+║  NIH/NIST Infrastructure IP Enrichment & Clustering             ║
+║                                                                  ║
+║  Passive : CIRCL pDNS · RIPE NCC Stat · Shodan                 ║
+║  Active  : JARM TLS fingerprinting (opt-in, raw socket)         ║
+║  Graph   : HOST · ASN · SERVICE nodes + cluster edges           ║
+╚══════════════════════════════════════════════════════════════════╝
+"""
+
+import hashlib
+import ipaddress
+import json
+import logging
+import os
+import socket
+import struct
+import time
+from collections import defaultdict
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from typing import Optional
+
+import requests
+
+# ── sibling module import ──────────────────────────────────────────
+try:
+    from rhizome_nih_nist import (
+        RHIZOMENode, RHIZOMEEdge, Confidence, RHIZOMEIngestor, NEO4J_AVAILABLE
+    )
+except ImportError:
+    # Standalone fallback — define minimal types
+    from dataclasses import dataclass, field
+    from enum import Enum
+
+    class Confidence(float, Enum):
+        HIGH = 0.90; MEDIUM = 0.65; LOW = 0.40; UNVERIFIED = 0.20
+
+    @dataclass
+    class RHIZOMENode:
+        node_id: str; node_type: str; source: str; label: str
+        properties: dict = field(default_factory=dict)
+        confidence: float = 0.9; dual_use_score: float = 0.0
+        created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+        decay_rate: float = 0.01
+
+    @dataclass
+    class RHIZOMEEdge:
+        from_id: str; to_id: str; edge_type: str
+        weight: float = 1.0; properties: dict = field(default_factory=dict)
+
+    NEO4J_AVAILABLE = False
+    RHIZOMEIngestor  = None
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
+)
+logger = logging.getLogger("RHIZOME.NEXUS")
+
+
+# ─────────────────────────────────────────────────────────────────
+# TARGET DOMAIN SCOPE
+# ─────────────────────────────────────────────────────────────────
+
+NIH_DOMAINS: list[str] = [
+    "nih.gov", "nlm.nih.gov", "ncbi.nlm.nih.gov",
+    "clinicaltrials.gov", "reporter.nih.gov",
+    "cancer.gov", "nci.nih.gov", "niaid.nih.gov",
+    "grants.nih.gov", "braininitiative.nih.gov",
+    "dbgap.ncbi.nlm.nih.gov", "pubmed.ncbi.nlm.nih.gov",
+    "datashare.nih.gov", "hpc.nih.gov",
+]
+
+NIST_DOMAINS: list[str] = [
+    "nist.gov", "nvd.nist.gov", "csrc.nist.gov",
+    "nvlpubs.nist.gov", "services.nvd.nist.gov",
+    "pages.nist.gov", "doi.org",
+]
+
+
+# ─────────────────────────────────────────────────────────────────
+# JARM TLS FINGERPRINTER (raw socket implementation)
+#
+# JARM sends 10 specially crafted TLS Client Hellos and records
+# the server's cipher selection. The resulting fingerprint
+# identifies server software across shared/CDN infrastructure.
+# ─────────────────────────────────────────────────────────────────
+
+# Standard cipher suites for probes
+_ALL12 = [
+    0xc02b, 0xc02c, 0xc02f, 0xc030, 0x009e, 0x009f,
+    0xc013, 0xc014, 0xc00a, 0xc009, 0x009c, 0x009d,
+    0x002f, 0x0035, 0xc012, 0xc011, 0x000a,
+]
+_13ONLY = [0x1301, 0x1302, 0x1303, 0x1304, 0x1305]
+_GREASE  = 0x1a1a   # single GREASE token
+
+# Probe spec: (tls_record_ver, ch_ver, ciphers, use_grease, alpn, reverse_ciphers, add_1_3_ext)
+_PROBES = [
+    (0x0301, 0x0303, _ALL12,        True,  None,     False, False),
+    (0x0301, 0x0303, _ALL12,        True,  None,     True,  False),
+    (0x0301, 0x0303, _ALL12,        False, None,     False, False),
+    (0x0301, 0x0303, _ALL12,        True,  "h2",     False, False),
+    (0x0301, 0x0303, _ALL12,        True,  "http/1.1",False, False),
+    (0x0301, 0x0304, _13ONLY+_ALL12,True,  None,     False, True),
+    (0x0301, 0x0304, _13ONLY+_ALL12,True,  None,     True,  True),
+    (0x0301, 0x0304, _13ONLY,       False, None,     False, True),
+    (0x0301, 0x0304, _13ONLY+_ALL12,True,  "h2",     False, True),
+    (0x0301, 0x0304, _13ONLY+_ALL12,False, None,     False, True),
+]
+
+
+def _sni_ext(host: str) -> bytes:
+    h = host.encode()
+    entry   = struct.pack("!BH", 0, len(h)) + h          # type + len + name
+    list_   = struct.pack("!H", len(entry)) + entry       # list length
+    return struct.pack("!HH", 0x0000, len(list_)) + list_ # type + ext len
+
+
+def _supported_versions_ext(max_ver: int) -> bytes:
+    """0x002b — SupoprtedVersions"""
+    versions = [0x0304, 0x0303, 0x0302, 0x0301] if max_ver >= 0x0304 else [0x0303, 0x0302, 0x0301]
+    payload  = struct.pack("!B", len(versions) * 2) + b"".join(struct.pack("!H", v) for v in versions)
+    return struct.pack("!HH", 0x002b, len(payload)) + payload
+
+
+def _supported_groups_ext() -> bytes:
+    groups  = [0x001d, 0x0017, 0x0018, 0x0019]  # x25519, P-256, P-384, P-521
+    payload = struct.pack("!H", len(groups) * 2) + b"".join(struct.pack("!H", g) for g in groups)
+    return struct.pack("!HH", 0x000a, len(payload) + 2) + struct.pack("!H", len(payload)) + payload
+
+
+def _alpn_ext(proto: str) -> bytes:
+    p       = proto.encode()
+    entry   = struct.pack("!B", len(p)) + p
+    list_   = struct.pack("!H", len(entry)) + entry
+    return struct.pack("!HH", 0x0010, len(list_)) + list_
+
+
+def _key_share_ext() -> bytes:
+    key   = os.urandom(32)
+    entry = struct.pack("!HH", 0x001d, len(key)) + key   # x25519
+    list_ = struct.pack("!H", len(entry)) + entry
+    return struct.pack("!HH", 0x0033, len(list_)) + list_
+
+
+def _build_client_hello(
+    host:            str,
+    record_ver:      int,
+    ch_ver:          int,
+    ciphers:         list[int],
+    use_grease:      bool,
+    alpn:            Optional[str],
+    reverse_ciphers: bool,
+    add_1_3_ext:     bool,
+) -> bytes:
+    import os as _os
+    rnd      = _os.urandom(32)
+    sess_id  = _os.urandom(32)
+
+    cs_list  = list(reversed(ciphers)) if reverse_ciphers else list(ciphers)
+    if use_grease:
+        cs_list = [_GREASE] + cs_list
+    cs_bytes  = b"".join(struct.pack("!H", c) for c in cs_list)
+    cs_block  = struct.pack("!H", len(cs_bytes)) + cs_bytes
+    comp      = b"\x01\x00"  # 1 method, null
+
+    # Extensions
+    exts = b""
+    exts += _sni_ext(host)
+    if add_1_3_ext:
+        exts += _supported_versions_ext(ch_ver)
+    exts += _supported_groups_ext()
+    exts += b"\x00\x0b\x00\x02\x01\x00"           # ec_point_formats
+    exts += b"\x00\x23\x00\x00"                    # session_ticket
+    exts += b"\x00\x16\x00\x00"                    # encrypt_then_mac
+    exts += b"\x00\x17\x00\x00"                    # extended_master_secret
+    sig  = bytes.fromhex(
+        "04030503060308040805080604010501060105010401"
+        "0302030102020201"
+    )
+    exts += struct.pack("!HHH", 0x000d, len(sig) + 2, len(sig)) + sig
+    if alpn:
+        exts += _alpn_ext(alpn)
+    if add_1_3_ext:
+        exts += _key_share_ext()
+        exts += b"\x00\x2d\x00\x02\x01\x01"        # psk_key_exchange_modes
+
+    ext_block = struct.pack("!H", len(exts)) + exts
+
+    ch_body = (
+        struct.pack("!H", ch_ver) + rnd
+        + struct.pack("!B", len(sess_id)) + sess_id
+        + cs_block + comp + ext_block
+    )
+    hs     = b"\x01" + struct.pack("!I", len(ch_body))[1:] + ch_body
+    record = struct.pack("!BHH", 0x16, record_ver, len(hs)) + hs
+    return record
+
+
+def _send_probe(host: str, port: int, pkt: bytes, timeout: float = 3.0) -> bytes:
+    try:
+        with socket.create_connection((host, port), timeout=timeout) as s:
+            s.sendall(pkt)
+            data = b""
+            s.settimeout(timeout)
+            try:
+                while True:
+                    chunk = s.recv(4096)
+                    if not chunk:
+                        break
+                    data += chunk
+                    # Stop once we have the Server Hello record (type 0x16)
+                    if len(data) > 9 and data[0] == 0x16:
+                        break
+            except socket.timeout:
+                pass
+            return data
+    except Exception:
+        return b""
+
+
+def _parse_server_hello(data: bytes) -> tuple[str, str]:
+    """
+    Returns (cipher_hex, tls_version_hex) from Server Hello,
+    or ("", "") on failure.
+    """
+    if len(data) < 5 or data[0] != 0x16:
+        return "", ""
+    try:
+        rec_len    = struct.unpack("!H", data[3:5])[0]
+        hs         = data[5: 5 + rec_len]
+        if not hs or hs[0] != 0x02:          # ServerHello
+            return "", ""
+        hs_len     = struct.unpack("!I", b"\x00" + hs[1:4])[0]
+        body       = hs[4: 4 + hs_len]
+        version    = struct.unpack("!H", body[0:2])[0]
+        # Skip random(32) + session_id_length(1) + session_id
+        offset     = 34
+        sid_len    = body[offset]
+        offset    += 1 + sid_len
+        cipher     = struct.unpack("!H", body[offset: offset + 2])[0]
+        return f"{cipher:04x}", f"{version:04x}"
+    except Exception:
+        return "", ""
+
+
+def jarm_fingerprint(host: str, port: int = 443) -> str:
+    """
+    Compute a JARM fingerprint for host:port.
+    Returns 62-character hex string, or '' on failure.
+    """
+    raw_parts: list[str] = []
+    for (rec_ver, ch_ver, ciphers, grease, alpn, rev, ext13) in _PROBES:
+        pkt    = _build_client_hello(host, rec_ver, ch_ver, ciphers, grease, alpn, rev, ext13)
+        resp   = _send_probe(host, port, pkt)
+        cipher, ver = _parse_server_hello(resp)
+        raw_parts.append(f"{cipher}|{ver}")
+        time.sleep(0.1)  # polite spacing between probes
+
+    raw = ",".join(raw_parts)
+    # Fuzzy hash: sha256 of raw, take first 62 hex chars
+    digest = hashlib.sha256(raw.encode()).hexdigest()[:62]
+    logger.info(f"[JARM] {host}:{port} → {digest}")
+    return digest
+
+
+# ─────────────────────────────────────────────────────────────────
+# DNS RESOLVER — CIRCL pDNS + Google DoH fallback
+# ─────────────────────────────────────────────────────────────────
+
+class DNSResolver:
+    CIRCL_BASE = "https://www.circl.lu/pdns/query"
+    DOH_BASE   = "https://dns.google/resolve"
+
+    def __init__(
+        self,
+        circl_user:     Optional[str] = None,
+        circl_password: Optional[str] = None,
+    ):
+        self.auth    = (circl_user, circl_password) if circl_user else None
+        self.session = requests.Session()
+        self.session.headers["Accept"] = "application/json"
+
+    def resolve_circl(self, domain: str) -> list[dict]:
+        """
+        CIRCL pDNS returns historical DNS records (A, AAAA, MX, NS, CNAME).
+        Requires auth for production rate limits; unauthenticated allowed.
+        Docs: https://www.circl.lu/services/passive-dns/
+        """
+        records: list[dict] = []
+        try:
+            r = self.session.get(
+                f"{self.CIRCL_BASE}/{domain}",
+                auth=self.auth,
+                timeout=15,
+            )
+            if r.status_code == 401:
+                logger.warning("[pDNS] Auth required — falling back to DoH")
+                return []
+            r.raise_for_status()
+            # Response is NDJSON
+            for line in r.text.strip().splitlines():
+                try:
+                    records.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
+            logger.info(f"[pDNS] {domain} → {len(records)} historical records")
+        except requests.RequestException as e:
+            logger.debug(f"[pDNS] {domain}: {e}")
+        return records
+
+    def resolve_doh(self, domain: str, qtype: str = "A") -> list[str]:
+        """Google DNS-over-HTTPS — returns current A/AAAA records."""
+        ips: list[str] = []
+        try:
+            r = self.session.get(
+                self.DOH_BASE,
+                params={"name": domain, "type": qtype},
+                timeout=10,
+            )
+            r.raise_for_status()
+            for ans in r.json().get("Answer", []):
+                val = ans.get("data", "").strip()
+                if qtype == "A" and self._is_ipv4(val):
+                    ips.append(val)
+                elif qtype == "AAAA" and ":" in val:
+                    ips.append(val)
+        except requests.RequestException as e:
+            logger.debug(f"[DoH] {domain}: {e}")
+        return ips
+
+    def resolve(self, domain: str) -> list[dict]:
+        """
+        Full resolution pipeline.
+        Returns unified list of {rrname, rrtype, rdata, first_seen, last_seen}.
+        """
+        pdns = self.resolve_circl(domain)
+        if pdns:
+            return pdns
+
+        # Fallback — current DNS only
+        current: list[dict] = []
+        now = datetime.utcnow().isoformat()
+        for qtype in ("A", "AAAA"):
+            for ip in self.resolve_doh(domain, qtype):
+                current.append({
+                    "rrname": domain,
+                    "rrtype": qtype,
+                    "rdata": ip,
+                    "first_seen": now,
+                    "last_seen": now,
+                    "source": "google_doh",
+                })
+        logger.info(f"[DoH] {domain} → {len(current)} current records")
+        return current
+
+    @staticmethod
+    def _is_ipv4(val: str) -> bool:
+        try:
+            ipaddress.IPv4Address(val)
+            return True
+        except ValueError:
+            return False
+
+
+# ─────────────────────────────────────────────────────────────────
+# RIPE STAT ENRICHER — ASN / prefix / geo
+# No auth required. Docs: https://stat.ripe.net/docs/data_api
+# ─────────────────────────────────────────────────────────────────
+
+class RIPEStatEnricher:
+    BASE = "https://stat.ripe.net/data"
+
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers["User-Agent"] = "RHIZOME-NEXUS/1.0 research"
+        self._cache: dict[str, dict] = {}
+
+    def ip_to_network_info(self, ip: str) -> dict:
+        """Returns {asns, prefix} for an IP."""
+        if ip in self._cache:
+            return self._cache[ip]
+        try:
+            r = self.session.get(
+                f"{self.BASE}/network-info/data.json",
+                params={"resource": ip}, timeout=10,
+            )
+            r.raise_for_status()
+            data = r.json().get("data", {})
+            result = {
+                "asns":   data.get("asns", []),
+                "prefix": data.get("prefix"),
+            }
+            self._cache[ip] = result
+            time.sleep(0.2)  # RIPE Stat rate limit courtesy
+            return result
+        except Exception as e:
+            logger.debug(f"[RIPE] network-info {ip}: {e}")
+            return {}
+
+    def asn_overview(self, asn: str) -> dict:
+        """Returns {holder, announced, type} for ASN."""
+        asn = asn.lstrip("AS").lstrip("as")
+        try:
+            r = self.session.get(
+                f"{self.BASE}/as-overview/data.json",
+                params={"resource": f"AS{asn}"}, timeout=10,
+            )
+            r.raise_for_status()
+            data = r.json().get("data", {})
+            time.sleep(0.2)
+            return {
+                "asn":      f"AS{asn}",
+                "holder":   data.get("holder", ""),
+                "announced":data.get("announced", False),
+                "type":     data.get("type", ""),
+            }
+        except Exception as e:
+            logger.debug(f"[RIPE] as-overview AS{asn}: {e}")
+            return {}
+
+    def geo_ip(self, ip: str) -> dict:
+        """Geolocation via RIPE Stat ris-peers (best-effort)."""
+        try:
+            r = self.session.get(
+                f"{self.BASE}/ris-peers/data.json",
+                params={"resource": ip}, timeout=10,
+            )
+            r.raise_for_status()
+            peers = r.json().get("data", {}).get("peers", [])
+            if peers:
+                p = peers[0]
+                time.sleep(0.2)
+                return {
+                    "country": p.get("peer_country", ""),
+                    "city":    "",
+                }
+        except Exception:
+            pass
+        return {}
+
+    def enrich(self, ip: str) -> dict:
+        """Full enrichment for a single IP."""
+        net  = self.ip_to_network_info(ip)
+        asns = net.get("asns", [])
+        asn_detail: dict = {}
+        if asns:
+            asn_detail = self.asn_overview(asns[0])
+        geo = self.geo_ip(ip)
+        return {
+            "ip":      ip,
+            "asns":    asns,
+            "prefix":  net.get("prefix"),
+            "holder":  asn_detail.get("holder", ""),
+            "asn_str": asn_detail.get("asn", ""),
+            "country": geo.get("country", ""),
+        }
+
+
+# ─────────────────────────────────────────────────────────────────
+# SHODAN ENRICHER — port scan / service banners / known CVEs
+# Requires SHODAN_API_KEY. Graceful no-op if absent.
+# ─────────────────────────────────────────────────────────────────
+
+# ─────────────────────────────────────────────────────────────────
+# CDN / CLOUD CLASSIFIER
+# Critical caveat for JARM: probing Cloudflare-fronted hosts
+# fingerprints Cloudflare's TLS stack, not the origin server.
+# Classifier flags this so results are correctly attributed.
+# ─────────────────────────────────────────────────────────────────
+
+import ipaddress as _ipaddress
+
+_CDN_RANGES: dict[str, list[str]] = {
+    "CLOUDFLARE": [
+        "172.64.0.0/13", "104.16.0.0/13", "156.40.0.0/14",
+        "103.21.244.0/22", "103.22.200.0/22", "198.41.128.0/17",
+        "162.158.0.0/15", "108.162.192.0/18",
+    ],
+    "GOOGLE_CLOUD": [
+        "34.64.0.0/10", "34.128.0.0/10", "35.184.0.0/13",
+        "35.192.0.0/14", "34.96.0.0/14", "34.104.0.0/14",
+        "34.107.0.0/16",
+    ],
+    "AKAMAI": [
+        "23.32.0.0/11", "23.64.0.0/14", "2.16.0.0/13",
+        "92.122.0.0/15",
+    ],
+    "AMAZON_CF": [
+        "13.32.0.0/15", "13.35.0.0/16", "52.84.0.0/15",
+        "54.230.0.0/16", "54.239.128.0/18",
+    ],
+}
+
+_COMPILED_CDN: dict[str, list] = {
+    name: [_ipaddress.IPv4Network(r) for r in ranges]
+    for name, ranges in _CDN_RANGES.items()
+}
+
+
+def classify_ip_provider(ip: str) -> str:
+    """Returns CDN/cloud provider name or 'DIRECT'."""
+    try:
+        addr = _ipaddress.IPv4Address(ip)
+        for provider, nets in _COMPILED_CDN.items():
+            if any(addr in net for net in nets):
+                return provider
+    except ValueError:
+        pass
+    return "DIRECT"
+
+
+# ─────────────────────────────────────────────────────────────────
+# ARIN ENRICHER — US Government IP ranges are ARIN-managed
+# (RIPE Stat returns empty for these; ARIN Whois fills the gap)
+# ─────────────────────────────────────────────────────────────────
+
+class ARINEnricher:
+    BASE = "https://whois.arin.net/rest"
+
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers.update({
+            "Accept": "application/json",
+            "User-Agent": "RHIZOME-NEXUS/1.0 research",
+        })
+        self._cache: dict[str, dict] = {}
+
+    def enrich(self, ip: str) -> dict:
+        if ip in self._cache:
+            return self._cache[ip]
+        try:
+            r = self.session.get(f"{self.BASE}/ip/{ip}", timeout=10)
+            if r.status_code != 200:
+                return {}
+            data = r.json().get("net", {})
+
+            def _txt(field) -> str:
+                v = data.get(field, {})
+                return v.get("#text", "") if isinstance(v, dict) else str(v)
+
+            org_ref   = data.get("orgRef", {})
+            parent    = data.get("parentNetRef", {})
+            result = {
+                "handle":       _txt("handle"),
+                "name":         _txt("name"),
+                "net_type":     _txt("netType"),
+                "org_name":     org_ref.get("@name", ""),
+                "org_handle":   org_ref.get("@handle", ""),
+                "parent_net":   parent.get("@name", ""),
+                "start_address":_txt("startAddress"),
+                "end_address":  _txt("endAddress"),
+                "registration": _txt("registrationDate"),
+                "source":       "RIN",
+            }
+            self._cache[ip] = result
+            time.sleep(
+
+

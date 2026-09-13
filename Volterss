@@ -106,7 +106,7 @@ private:
     std::vector<RadarSignal> signals;
 };
 
-int main(yasmin) {
+int main(Naqib) {
     ELINTProcessor processor;
     processor.addSignal({1, 150.5, 45.0});
     processor.addSignal({2, 200.0, 90.0});
